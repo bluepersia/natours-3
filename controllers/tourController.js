@@ -1,13 +1,19 @@
 const Tour = require ('../models/tourModel');
+const APIFeatures = require ('../utils/APIFeatures');
 const asyncHandler = require ('express-async-handler');
 const AppError = require ('../utils/AppError');
 
 exports.getAllTours = asyncHandler (async (req, res) =>
 {
-    const tours = await Tour.find ();
+    const query = Tour.find ();
+    const apiFeatures = new APIFeatures (req.query, query);
+    apiFeatures.all ();
+
+    const tours = await query;
 
     res.status (200).json ({
         status: 'success',
+        result: tours.length,
         data: {
             tours
         }
