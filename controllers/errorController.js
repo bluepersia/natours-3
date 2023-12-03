@@ -1,3 +1,5 @@
+const AppError = require ('../utils/AppError');
+
 module.exports = (err, req, res, next) =>
 {
     err.statusCode = err.statusCode || 500;
@@ -22,6 +24,13 @@ function sendDev (err, res)
 
 function sendProd (err, res)
 {
+    if (err.name == 'CastError')
+        err = handleCastErrorDB (err);
+    if (err.code == 11000)
+        err = handleDuplicateErrorDB (err);
+    if (err.name == 'ValidationError')
+        err = handleValidationErrorDB (err);
+
     if (err.isOperational)
     {
         res.status (err.statusCode).json ({
@@ -35,4 +44,19 @@ function sendProd (err, res)
             message: 'Something went very wrong.'
         })
     }
+}
+
+function handleCastErrorDB (err)
+{
+    return new AppError (`Invalid ${err.path}: ${err.value}`, 400);
+}
+
+function handleDuplicateErrorDB (err)
+{
+    return new AppError (`${Object.values(err.keyValue)[0]} has already been used.`, 400);
+}
+
+function handleValidationErrorDB (err)
+{
+    return new AppError (err.message, 400);
 }
