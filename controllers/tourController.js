@@ -3,6 +3,14 @@ const APIFeatures = require ('../utils/APIFeatures');
 const asyncHandler = require ('express-async-handler');
 const AppError = require ('../utils/AppError');
 
+exports.top5Cheap = (req, res, next) => {
+
+    req.query.sort = '-ratingsAverage price';
+    req.query.fields ='name,price,ratingsAverage';
+    req.query.limit = 5;
+    next ();
+}
+
 exports.getAllTours = asyncHandler (async (req, res) =>
 {
     const query = Tour.find ();
@@ -77,4 +85,41 @@ exports.deleteTour = asyncHandler (async (req, res) => {
             tour
         }
     })
+});
+
+
+exports.getTourStats = asyncHandler (async (req, res) => {
+
+    const stats = await Tour.aggregate ([
+        {
+            $match: { ratingsAverage: { $gte: 4.5}}
+        },
+        {
+            $group: {
+                _id: '$difficulty',
+                avgRating: {$avg: '$ratingsAverage'},
+                avgPrice: { $avg: '$price'},
+                maxPrice: { $max: '$price'},
+                minPrice: {$min: '$price'},
+                numRatings: {$sum: '$ratingsQuantity'},
+                numTours: {$sum: 1}
+            }
+        },
+        {
+            $sort: { avgPrice: 1}
+        }
+    ])
+
+    res.status (200).json ({
+        status: 'success',
+        data: {
+            stats
+        }
+    })
+})
+
+exports.getMonthlyPlan = asyncHandler (async (req, res) => {
+
+    const year = req.params.year;
+
 });
