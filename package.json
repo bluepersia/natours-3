@@ -9,6 +9,8 @@
   "author": "Marco Zimmermann",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "express-async-handler": "^1.2.0",
+    "mongoose": "^8.0.2"
   }
 }
