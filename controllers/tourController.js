@@ -124,7 +124,7 @@ exports.getMonthlyPlan = asyncHandler (async (req, res) => {
 
     const plan = await Tour.aggregate ([
         {
-            $unwind: 'startDates'
+            $unwind: '$startDates'
         },
         {
             $match: { startDates: {
@@ -152,4 +152,11 @@ exports.getMonthlyPlan = asyncHandler (async (req, res) => {
             $limit: 12
         }
     ])
+
+    res.status (200).json ({
+        status: 'success',
+        data: {
+            plan
+        }
+    })
 });
