@@ -30,7 +30,8 @@ const userSchema = new mongoose.Schema ({
             message: 'Passwords do not match!'
         },
         select: false
-    }
+    },
+    passwordChangedAt: Date
 })
 
 userSchema.pre ('save', async function (next)
@@ -43,10 +44,19 @@ userSchema.pre ('save', async function (next)
     next ();
 })
 
-userSchema.methods.comparePassword (function (raw, encrypted)
+userSchema.methods.comparePassword (async function (raw, encrypted)
 {
-   
+    return await bcrypt.compare (raw, encrypted);
 });
+
+
+userSchema.methods.hasPasswordChangedAfter (function (iat)
+{
+    if (this.passwordChangedAt)
+        return this.passwordChangedAt.getTime() / 1000 > iat;
+
+    return false;
+})
 
 const User = mongoose.model ('User', userSchema);
 

@@ -29,7 +29,12 @@ function sendProd (err, res)
     if (err.code == 11000)
         err = handleDuplicateErrorDB (err);
     if (err.name == 'ValidationError')
-        err = handleValidationErrorDB (err);
+        err = handleValidationErrorDB (err);    
+    if (err.name == 'JsonWebTokenError')
+        err = handleJsonWebTokenError ();
+    if (err.name == 'TokenExpiredError')
+        err = handleTokenExpiredError ();
+
 
     if (err.isOperational)
     {
@@ -59,4 +64,15 @@ function handleDuplicateErrorDB (err)
 function handleValidationErrorDB (err)
 {
     return new AppError (err.message, 400);
+}
+
+
+function handleJsonWebTokenError ()
+{
+    return new AppError ('Invalid token.', 401);
+}
+
+function handleTokenExpiredError ()
+{
+    return new AppError ('Token has expired.', 401);
 }
