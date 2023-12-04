@@ -1,6 +1,7 @@
 const User = require ('../models/userModel');
 const asyncHandler = require ('express-async-handler');
 const jwt = require ('jsonwebtoken');
+const AppError = require ('../utils/AppError');
 
 function signToken (id)
 {
@@ -10,6 +11,8 @@ function signToken (id)
 function signSend (user, res, statusCode = 200)
 {
     const token = signToken (user.id);
+
+    user.password = undefined;
 
     res.statusCode (statusCode).json ({
         status: 'success',
@@ -27,3 +30,23 @@ exports.signup = asyncHandler (async (req, res) => {
     signSend (user, res, 201);
 
 });
+
+exports.login = asyncHandler (async (req, res)=> {
+
+    const {email, password} = req.body;
+
+    if (!email || !password)
+        throw new AppError ('Please provide an email and password', 400);
+
+    const user = await User.findOne({email}).select ('+password');
+
+    if (!await user.comparePassword (password, user.password))
+        throw new AppError ('Incorrect password', 401);
+
+    signSend (user, res, 200);
+});
+
+
+
+
+
