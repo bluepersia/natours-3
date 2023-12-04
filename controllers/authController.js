@@ -15,6 +15,12 @@ function signSend (user, res, statusCode = 200)
 {
     const token = signToken (user.id);
 
+    res.cookie ('jwt', token, {
+        expires: new Date (Date.now() + (process.env.JWT_COOKIE_EXPIRY * 24 * 60 * 60 * 1000)),
+        secure: process.env.NODE_ENV == 'production',
+        httpOnly: true
+    })
+
     user.password = undefined;
 
     res.statusCode (statusCode).json ({
